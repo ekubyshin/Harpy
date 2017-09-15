@@ -5,6 +5,10 @@
 ---
 
 ## About
+Based on [**Harpy**](https://github.com/ArtSabintsev/Harpy).
+
+Just added a few lines of code to more flexible reporting. Added new delegate method (please, see below).
+
 **Harpy** checks a user's currently installed version of your iOS app against the version that is currently available in the App Store. If a new version is available, an alert can be presented to the user informing them of the newer version, and giving them the option to update the application.
 
 Harpy is built to work with the [Semantic Versioning](http://www.semver.org) system.
@@ -12,9 +16,6 @@ Harpy is built to work with the [Semantic Versioning](http://www.semver.org) sys
 - Harpy also supports two-number versioning (e.g., 1.0)
 - Harpy also supports four-number versioning (e.g., 1.0.0.0)
 - Harpy only works with numbers.
-
-## Swift Support
-Harpy was ported to Swift by myself and [**Aaron Brager**](http://twitter.com/GetAaron). We've called the new project [**Siren**](https://github.com/ArtSabintsev/Siren) and it can be found [**here**](https://github.com/ArtSabintsev/Siren).
 
 ## Features
 - [x] CocoaPods Support
@@ -166,6 +167,16 @@ If you'd like to handle or track the end-user's behavior, four delegate methods 
 
 	// User did click on button that cancels update dialog
 	- (void)harpyUserDidCancel;
+
+    // Current version is the latest
+    - (void)harpyDidnotFindNewVersion;
+
+    // Harpy failed to detect new version
+    - (void)harpyDidFailToDetectNewVersion;
+
+    // Harpy found incompatible new version
+    - (void)harpyDidFindIncompatibleNewVersion;
+    
 ```
 
 If you would like to use your own UI, please use the following delegate method to obtain the localized update message if a new version is available:

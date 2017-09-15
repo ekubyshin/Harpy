@@ -163,6 +163,10 @@ NSString * const HarpyLanguageVietnamese            = @"vi";
                                             completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                                                 if ([data length] > 0 && !error) { // Success
                                                     [self parseResults:data];
+                                                } else {
+                                                    if ([self.delegate respondsToSelector:@selector(harpyDidFailToDetectNewVersion)]) {
+                                                        [self.delegate harpyDidFailToDetectNewVersion];
+                                                    }
                                                 }
                                             }];
     [task resume];
@@ -191,11 +195,17 @@ NSString * const HarpyLanguageVietnamese            = @"vi";
 
             NSString *releaseDateString = [[results valueForKey:@"currentVersionReleaseDate"] objectAtIndex:0];
             if (releaseDateString == nil) {
+                if ([self.delegate respondsToSelector:@selector(harpyDidFailToDetectNewVersion)]) {
+                    [self.delegate harpyDidFailToDetectNewVersion];
+                }
                 return;
             } else {
                 NSInteger daysSinceRelease = [self daysSinceDateString:releaseDateString];
                 if (!(daysSinceRelease >= _showAlertAfterCurrentVersionHasBeenReleasedForDays)) {
                     NSString *message = [NSString stringWithFormat:@"Your app has been released for %ld days, but Siren cannot prompt the user until %lu days have passed.", (long)daysSinceRelease, (unsigned long)_showAlertAfterCurrentVersionHasBeenReleasedForDays];
+                    if ([self.delegate respondsToSelector:@selector(harpyDidFailToDetectNewVersion)]) {
+                        [self.delegate harpyDidFailToDetectNewVersion];
+                    }
                     [self printDebugMessage:message];
                     return;
                 }
@@ -209,6 +219,9 @@ NSString * const HarpyLanguageVietnamese            = @"vi";
 
             NSArray *versionsInAppStore = [results valueForKey:@"version"];
             if (versionsInAppStore == nil) {
+                if ([self.delegate respondsToSelector:@selector(harpyDidFailToDetectNewVersion)]) {
+                    [self.delegate harpyDidFailToDetectNewVersion];
+                }
                 return;
             } else {
                 if ([versionsInAppStore count]) {
@@ -216,12 +229,18 @@ NSString * const HarpyLanguageVietnamese            = @"vi";
                     if ([self isAppStoreVersionNewer:_currentAppStoreVersion]) {
                         [self appStoreVersionIsNewer:_currentAppStoreVersion];
                     } else {
+                        if ([self.delegate respondsToSelector:@selector(harpyDidnotFindNewVersion)]) {
+                            [self.delegate harpyDidnotFindNewVersion];
+                        }
                         [self printDebugMessage:@"Currently installed version is newer."];
                     }
                 }
             }
         });
     } else {
+        if ([self.delegate respondsToSelector:@selector(harpyDidFindIncompatibleNewVersion)]) {
+            [self.delegate harpyDidFindIncompatibleNewVersion];
+        }
         [self printDebugMessage:@"Device is incompatible with installed verison of iOS."];
     }
 }
@@ -289,6 +308,9 @@ NSString * const HarpyLanguageVietnamese            = @"vi";
      _appID = _appData[@"results"][0][@"trackId"];
 
     if (_appID == nil) {
+        if ([self.delegate respondsToSelector:@selector(harpyDidFailToDetectNewVersion)]) {
+            [self.delegate harpyDidFailToDetectNewVersion];
+        }
         [self printDebugMessage:@"appID is nil, which means to the trackId key is missing from the JSON results that Apple returned for your bundleID. If a version of your app is in the store and you are seeing this message, please open up an issue http://github.com/ArtSabintsev/Harpy and provide as much detail about your app as you can. Thanks!"];
     } else {
         [self localizeAlertStringsForCurrentAppStoreVersion:currentAppStoreVersion];
